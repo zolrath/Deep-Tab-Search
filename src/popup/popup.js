@@ -124,12 +124,25 @@ async function insertStrings () {
 }
 
 function registerListeners () {
-  document.getElementById('search').addEventListener('input', onSearchInput, false)
+  document.getElementById('search').addEventListener('input', debounce(onSearchInput, 400), false)
   document.getElementById('search').addEventListener('keydown', onSearchKeydown, false)
   document.getElementById('results').addEventListener('click', onResultsClicked, false)
 
   document.body.addEventListener('keydown', onDocumentKeydown)
   document.body.addEventListener('keyup', onDocumentKeyup)
+}
+
+// Only call the callback after this function has not been called for `delay` milliseconds.
+// This allows onSearchInput to ignore keys while the user is typing a word, improving its
+// responsiveness greatly as it does not fetch results for out of date input.
+function debounce (callback, delay) {
+  let timer;
+  return function(...args) {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      callback.apply(this, args);
+    }, delay);
+  };
 }
 
 async function onSearchInput () {
